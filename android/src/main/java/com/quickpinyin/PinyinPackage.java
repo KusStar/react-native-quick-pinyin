@@ -1,4 +1,4 @@
-package com.reactnativepinyin;
+package com.quickpinyin;
 
 import androidx.annotation.NonNull;
 

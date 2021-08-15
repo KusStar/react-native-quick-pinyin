@@ -1,3 +1,3 @@
 #include <jsi/jsi.h>
 
-void installPinyin(facebook::jsi::Runtime& jsiRuntime);
+void install(facebook::jsi::Runtime& jsiRuntime);

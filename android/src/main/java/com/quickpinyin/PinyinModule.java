@@ -1,4 +1,4 @@
-package com.reactnativepinyin;
+package com.quickpinyin;
 
 import androidx.annotation.NonNull;
 
@@ -10,7 +10,7 @@ import com.facebook.react.module.annotations.ReactModule;
 
 @ReactModule(name = PinyinModule.NAME)
 public class PinyinModule extends ReactContextBaseJavaModule {
-    public static final String NAME = "RNPinyin";
+    public static final String NAME = "QuickPinyin";
 
     public PinyinModule(ReactApplicationContext reactContext) {
         super(reactContext);
