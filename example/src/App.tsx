@@ -1,18 +1,13 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import Pinyin from 'react-native-quick-pinyin';
+
+declare function quickpinyin(arg: string): void;
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
-    Pinyin.multiply(3, 7).then(setResult);
-  }, []);
-
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>Result {quickpinyin('asdsd')}</Text>
     </View>
   );
 }

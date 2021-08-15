@@ -1,6 +1,5 @@
 rootProject.name = 'PinyinExample'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'
-
 include ':reactnativepinyin'
 project(':reactnativepinyin').projectDir = new File(rootProject.projectDir, '../../android')

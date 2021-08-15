@@ -1,3 +1,5 @@
+# cmake
+.cxx
 # OSX
 #
 .DS_Store
@@ -6,12 +8,10 @@
 .expo/
 
 # VSCode
-.vscode/
 jsconfig.json
 
 # Xcode
 #
-.cxx
 build/
 *.pbxuser
 !default.pbxuser
