@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import Pinyin from 'react-native-pinyin';
+import Pinyin from 'react-native-quick-pinyin';
 
 export default function App() {
   const [result, setResult] = React.useState<number | undefined>();

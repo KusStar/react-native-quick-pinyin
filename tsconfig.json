@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-pinyin": ["./src/index"]
+      "react-native-quick-pinyin": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

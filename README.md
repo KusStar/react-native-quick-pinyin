@@ -1,17 +1,17 @@
-# react-native-pinyin
+# react-native-quick-pinyin
 
 A module parses chinese to pinyin for React Native(jsi)
 
 ## Installation
 
 ```sh
-npm install react-native-pinyin
+npm install react-native-quick-pinyin
 ```
 
 ## Usage
 
 ```js
-import Pinyin from "react-native-pinyin";
+import Pinyin from "react-native-quick-pinyin";
 
 // ...
 

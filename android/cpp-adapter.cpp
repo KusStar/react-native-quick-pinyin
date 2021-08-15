@@ -1,8 +1,12 @@
 #include <jni.h>
-#include "example.h"
+#include "react-native-quick-pinyin.h"
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_reactnativepinyin_PinyinModule_nativeMultiply(JNIEnv *env, jclass type, jint a, jint b) {
-    return example::multiply(a, b);
+Java_com_reactnativepinyin_PinyinModule_initialize(JNIEnv* env, jclass clazz, jlong jsiPtr) {
+    auto runtime = reinterpret_cast<facebook::jsi::Runtime *>(jsiPtr);
+
+    if (runtime) {
+      installPinyin(*runtime);
+    }
 }

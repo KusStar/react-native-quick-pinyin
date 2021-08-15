@@ -1,5 +1,5 @@
 {
-  "name": "react-native-pinyin",
+  "name": "react-native-quick-pinyin",
   "version": "0.1.0",
   "description": "A module parses chinese to pinyin for React Native(jsi)",
   "main": "lib/commonjs/index",
@@ -13,7 +13,7 @@
     "android",
     "ios",
     "cpp",
-    "react-native-pinyin.podspec",
+    "react-native-quick-pinyin.podspec",
     "!lib/typescript/example",
     "!android/build",
     "!ios/build",
@@ -36,13 +36,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/KusStar/react-native-pinyin",
+  "repository": "https://github.com/KusStar/react-native-quick-pinyin",
   "author": "Kuss <2360314753@qq.com> (https://github.com/KusStar)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/KusStar/react-native-pinyin/issues"
+    "url": "https://github.com/KusStar/react-native-quick-pinyin/issues"
   },
-  "homepage": "https://github.com/KusStar/react-native-pinyin#readme",
+  "homepage": "https://github.com/KusStar/react-native-quick-pinyin#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

@@ -1,6 +1,6 @@
 {
-  "name": "react-native-pinyin-example",
-  "description": "Example app for react-native-pinyin",
+  "name": "react-native-quick-pinyin-example",
+  "description": "Example app for react-native-quick-pinyin",
   "version": "0.0.1",
   "private": true,
   "scripts": {

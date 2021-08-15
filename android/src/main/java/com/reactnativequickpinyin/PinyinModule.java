@@ -10,7 +10,7 @@ import com.facebook.react.module.annotations.ReactModule;
 
 @ReactModule(name = PinyinModule.NAME)
 public class PinyinModule extends ReactContextBaseJavaModule {
-    public static final String NAME = "Pinyin";
+    public static final String NAME = "RNPinyin";
 
     public PinyinModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -25,17 +25,19 @@ public class PinyinModule extends ReactContextBaseJavaModule {
     static {
         try {
             // Used to load the 'native-lib' library on application startup.
-            System.loadLibrary("cpp");
+            System.loadLibrary("quickpinyin");
         } catch (Exception ignored) {
         }
     }
 
-    // Example method
-    // See https://reactnative.dev/docs/native-modules-android
-    @ReactMethod
-    public void multiply(int a, int b, Promise promise) {
-        promise.resolve(nativeMultiply(a, b));
-    }
+    public static native void initialize(long jsiPtr, String docDir);
 
-    public static native int nativeMultiply(int a, int b);
+    @Override
+    public void initialize() {
+      super.initialize();
+
+      PinyinModule.initialize(
+        this.getReactApplicationContext().getJavaScriptContextHolder().get(),
+        this.getReactApplicationContext().getFilesDir().getAbsolutePath());
+    }
 }
