@@ -2,7 +2,7 @@ const fs = require('fs');
 const { join } = require('path');
 const Buffer = require('buffer').Buffer;
 
-const dict = require('./dict');
+const dict = require('./dict.json');
 
 // parse hex string to code point array, e.g. 'e5958a' => [ '0xe5', '0x95', '0x8a' ]
 const toHexArr = (c) => {
