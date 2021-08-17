@@ -1,21 +1,35 @@
 # react-native-quick-pinyin
 
-A module parses chinese to pinyin for React Native(jsi)
+A module parses chinese to pinyin characters for React Native purely through JSI binding.
+
+<a href="./docs/screenshot.png">
+  <img src="./docs/screenshot.png" width="300px"/>
+</a>
 
 ## Installation
 
 ```sh
-npm install react-native-quick-pinyin
+$ npm install react-native-quick-pinyin
+# or yarn add react-native-quick-pinyin
 ```
 
 ## Usage
 
-```js
+```javascript
 import Pinyin from "react-native-quick-pinyin";
 
-// ...
+Pinyin.getFullChars('你好')
+// nihao
+```
 
-const result = await Pinyin.multiply(3, 7);
+Also, you can check the [example](./example).
+
+## Interface
+
+```typescript
+interface QuickPinyin {
+  getFullChars: (text: string) => string;
+}
 ```
 
 ## Contributing
