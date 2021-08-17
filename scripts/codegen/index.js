@@ -26,13 +26,13 @@ const failRetGuard = (set) => {
 
   return `
     if (p1 < ${firstKeys[0]} || p1 > ${firstKeys[firstKeys.length - 1]}) {
-      return hanzi;
+      return text;
     }
     if (p2 < ${secondKeys[0]} || p2 > ${secondKeys[secondKeys.length - 1]}) {
-      return hanzi;
+      return text;
     }
     if (p3 < ${thirdKeys[0]} || p3 > ${thirdKeys[thirdKeys.length - 1]}) {
-      return hanzi;
+      return text;
     }
 `;
 };
@@ -117,10 +117,10 @@ const genCpp = (obj) => {
     ifRet.push(ifRetStat(key, from, to));
   }
 
-  result.push(`std::string ${TO_PINYIN}(const std::string& hanzi) {
-    const uint8_t p1 = static_cast<uint8_t>(hanzi[0]),
-      p2 = static_cast<uint8_t>(hanzi[1]),
-      p3 = static_cast<uint8_t>(hanzi[2]);
+  result.push(`std::string ${TO_PINYIN}(const std::string& text) {
+    const uint8_t p1 = static_cast<uint8_t>(text[0]),
+      p2 = static_cast<uint8_t>(text[1]),
+      p3 = static_cast<uint8_t>(text[2]);
       ${failRetGuard(set)}
     for (int i = 0; i < ${len}; i++) {
       const uint8_t a = dict[i][0], b = dict[i][1], c = dict[i][2];
@@ -128,11 +128,11 @@ const genCpp = (obj) => {
         ${ifRet.join('\n')}
       }
     }
-    return hanzi;
+    return text;
   }`);
 
   console.log(`ifRet length: ${ifRet.length}`);
-  console.log(`Total ${len} hanzi`);
+  console.log(`Total ${len} text`);
 
   const target = join(__dirname, '../../cpp', 'pinyin.cpp');
 
