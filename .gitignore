@@ -1,4 +1,7 @@
+hanzi.txt
+pinyin.txt
 pinyin.cpp
+pinyin_test
 # cmake
 .cxx
 # OSX

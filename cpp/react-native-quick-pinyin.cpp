@@ -1,22 +1,29 @@
 #import "react-native-quick-pinyin.h"
+#include "pinyin.h"
+#include "react-native-quick-pinyin.h"
 
-#include <iostream>
-#include <sstream>
+using namespace facebook;
+using namespace std;
 
-using namespace facebook::jsi;
+#define MODULE_NAME "quickpinyin"
+#define METHOD_GET_FULL_CHARS "getFullChars"
 
-void install(Runtime &jsiRuntime) {
-  auto hello = Function::createFromHostFunction(
-      jsiRuntime, PropNameID::forAscii(jsiRuntime, "quickpinyin"), 1,
-      [](Runtime &rt, const Value &thisValue, const Value *arguments,
-         size_t count) -> Value {
-        if (count != 1) {
-          detail::throwJSError(
-              rt, "[react-native-quick-pinyin] arg count must be 1");
+void install(jsi::Runtime &rt) {
+  auto thisModule = jsi::Object(rt);
+
+  auto getFullChars = jsi::Function::createFromHostFunction(
+      rt, jsi::PropNameID::forAscii(rt, METHOD_GET_FULL_CHARS), 1,
+      [](jsi::Runtime &rt, const jsi::Value &thisValue,
+         const jsi::Value *arguments, size_t count) -> jsi::Value {
+        if (!arguments[0].isString()) {
+          throw jsi::JSError(
+              rt, "[quickpinyin.getFullChars] First argument must be a string");
         }
-        std::string str = arguments[0].getString(rt).utf8(rt);
-        return Value(String::createFromUtf8(rt, str));
+        const std::string str = arguments[0].getString(rt).utf8(rt);
+        return jsi::Value(jsi::String::createFromUtf8(rt, toFullChars(str)));
       });
 
-  jsiRuntime.global().setProperty(jsiRuntime, "quickpinyin", std::move(hello));
+  thisModule.setProperty(rt, METHOD_GET_FULL_CHARS, move(getFullChars));
+
+  rt.global().setProperty(rt, MODULE_NAME, move(thisModule));
 }
