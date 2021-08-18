@@ -10,7 +10,10 @@ const genHeader = (obj) => {
   const result = [];
   let idx = 0;
 
-  result.push(`#include <sstream>
+  result.push(`#ifndef QUICK_PINYIN_H
+#define QUICK_PINYIN_H
+
+#include <sstream>
 #include <string>
 #include <iostream>
 
@@ -61,6 +64,9 @@ std::string toFullChars(const std::string &text);
   result.push(
     `static const uint16_t PINYIN_CODE[] = { ${pinyinCode.join(', ')} };`
   );
+
+  result.push('#endif');
+
   const target = join(__dirname, '../../cpp', 'pinyin.h');
 
   fs.writeFileSync(target, result.join('\n'), {
