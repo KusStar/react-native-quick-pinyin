@@ -1,6 +1,7 @@
 hanzi.txt
 pinyin.txt
 pinyin.cpp
+pinyin.h
 pinyin_test
 # cmake
 .cxx

@@ -7,7 +7,6 @@
 #include "../pinyin.h"
 #include <fstream>
 #include <iostream>
-#include <stdexcept>
 #include <string>
 
 using namespace std;
@@ -17,14 +16,15 @@ int main() {
   hanzi.open("./hanzi.txt");
   pinyin.open("./pinyin.txt");
 
+  const clock_t begin_time = clock();
   int lineNumber = 1;
-
+  // do something
   string hanziLine, pinyinLine;
   if (hanzi.is_open() && pinyin.is_open()) {
     while (getline(hanzi, hanziLine) && getline(pinyin, pinyinLine)) {
       if (toFullChars(hanziLine) != pinyinLine) {
         cerr << "[toFullChars] incorrect at ./hanzi.txt:" << lineNumber
-        << " or ./pinyin.txt:" << lineNumber << endl;
+             << " or ./pinyin.txt:" << lineNumber << endl;
         exit(0);
       }
       lineNumber++;
@@ -32,6 +32,7 @@ int main() {
     hanzi.close();
     pinyin.close();
   }
-
   cout << "[toFullChars] test done, total " << lineNumber << " lines" << endl;
+  cout << "execute time: " << float(clock() - begin_time) / CLOCKS_PER_SEC
+       << '\n';
 }
