@@ -1,6 +1,19 @@
-import * as React from 'react';
-import { StyleSheet, View, Text, ScrollView, SafeAreaView } from 'react-native';
-import Pinyin from 'react-native-quick-pinyin';
+import React, { useEffect, useRef } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  Platform,
+} from 'react-native';
+import QuickPinyin from 'react-native-quick-pinyin';
+// @ts-ignore
+import JSPinyin from 'js-pinyin';
+
+declare const performance: {
+  now: () => number;
+};
 
 const quote = `世上人营营逐逐急急巴巴跳不出七情六欲关头打不破酒色财气圈子到头来同归于尽着甚要紧虽是如此说只这酒色财气四件中唯有财色二者更为利害怎见得他的利害
 假如一个人到了那穷苦的田地受尽无限凄凉耐尽无端懊恼晚来摸一摸米瓮苦无隔宿之炊早起看一看厨前愧无半星烟火妻子饥寒一身冻馁就是那粥饭尚且艰难那讨馀钱沽酒
@@ -13,12 +26,50 @@ const quote = `世上人营营逐逐急急巴巴跳不出七情六欲关头打�
 三寸气在千般用一日无常万事休`;
 
 export default function App() {
-  const scrollRef = React.useRef<any>();
+  const scrollRef = useRef<any>();
+  const sleep = (second = 1) =>
+    new Promise((res) => {
+      setTimeout(res, second * 1000);
+    });
 
-  React.useEffect(() => {
+  const quickPinyinBench = async () => {
+    await sleep(2);
+    const start = performance.now();
+
+    for (let i = 0; i < 100; i++) {
+      QuickPinyin.getFullChars(quote);
+    }
+
+    console.log(
+      `${Platform.OS} [quickpinyin.getFullChars] took`,
+      (performance.now() - start).toFixed(2),
+      'milliseconds'
+    );
+  };
+
+  const jsPinyinBench = async () => {
+    await sleep(2);
+
+    const start = performance.now();
+
+    for (let i = 0; i < 100; i++) {
+      JSPinyin.getFullChars(quote);
+    }
+
+    console.log(
+      `${Platform.OS} [js-pinyin.getFullChars] took`,
+      (performance.now() - start).toFixed(2),
+      'milliseconds'
+    );
+  };
+
+  useEffect(() => {
+    quickPinyinBench();
+    jsPinyinBench();
     requestAnimationFrame(() => {
       scrollRef.current?.scrollToEnd();
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -27,7 +78,7 @@ export default function App() {
         <View style={styles.paragraph}>
           {quote.split('\n').map((line) =>
             line.split('').map((char, i) => {
-              const pinyin = Pinyin.getFullChars(char);
+              const pinyin = QuickPinyin.getFullChars(char);
               return (
                 <View key={i} style={styles.textContainer}>
                   {/[a-z]/.test(pinyin) && (
