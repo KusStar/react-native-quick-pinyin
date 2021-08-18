@@ -1,48 +1,102 @@
 const fs = require('fs');
 const { join } = require('path');
-const Buffer = require('buffer').Buffer;
 
 const dict = require('./dict.json');
 
-// parse hex string to code point array, e.g. 'e5958a' => [ '0xe5', '0x95', '0x8a' ]
-const toHexArr = (c) => {
-  const ret = [];
-  const str = Buffer.from(c).toString('hex');
-  for (let i = 0; i < str.length; i += 2) {
-    ret.push(parseInt('0x' + str.substr(i, 2), 16));
+const MIN_VALUE = 19968;
+const MAX_VALUE = 40869;
+
+const genHeader = (obj) => {
+  const result = [];
+  let idx = 0;
+
+  result.push(`#include <sstream>
+#include <string>
+#include <iostream>
+
+#define PINYIN_MIN_VALUE ${MIN_VALUE}
+#define PINYIN_MAX_VALUE ${MAX_VALUE}
+#define PINYIN_12295 "ling"
+#define PINYIN_CODE_12295 12295
+`);
+
+  result.push(`
+uint16_t getPinyinCodeIndex(uint16_t c) ;
+uint16_t toUnicode(const std::string &hanzi);
+std::string toFullChars(const std::string &text);
+`);
+
+  // PINYIN_TABLE and PINYIN_CODE
+  const pinyinIndexMap = Object.keys(obj).reduce((acc, cur, i) => {
+    acc[cur] = i + 1;
+    return acc;
+  }, {});
+  const pinyinTableResult = [];
+  const offsetTable = {};
+  for (let key in obj) {
+    pinyinIndexMap[key] = idx + 1;
+    for (let c of obj[key]) {
+      const curOffset = c.charCodeAt(0) - MIN_VALUE;
+      offsetTable[curOffset] = pinyinIndexMap[key];
+    }
+    idx++;
+    pinyinTableResult.push(`"${key}"`);
   }
-  return ret;
+  result.push(`static const std::string PINYIN_TABLE[] = {
+      "", ${pinyinTableResult.join(', ')}
+    };`);
+
+  const pinyinCodeLen =
+    Number(Object.keys(offsetTable).sort((a, b) => b - a)[0]) + 1;
+  const pinyinCode = new Array(pinyinCodeLen);
+
+  for (let i = 0; i < pinyinCodeLen; i++) {
+    if (offsetTable.hasOwnProperty(i)) {
+      pinyinCode[i] = offsetTable[i];
+    } else {
+      pinyinCode[i] = 0;
+    }
+  }
+
+  result.push(
+    `static const uint16_t PINYIN_CODE[] = { ${pinyinCode.join(', ')} };`
+  );
+  const target = join(__dirname, '../../cpp', 'pinyin.h');
+
+  fs.writeFileSync(target, result.join('\n'), {
+    encoding: 'utf-8',
+  });
+
+  console.log(`Generated ${target}`);
 };
 
-const ifRetStat = (key, from, to) => `
-        if (i >= ${from} && i <= ${to}) {
-          return "${key}";
-        }`;
+const genCpp = () => {
+  const result = [];
 
-const failRetGuard = (set) => {
-  const firstKeys = Object.keys(set.first);
-  const secondKeys = Object.keys(set.second);
-  const thirdKeys = Object.keys(set.third);
+  result.push(`#include "pinyin.h"`);
 
-  return `
-    if (p1 < ${firstKeys[0]} || p1 > ${firstKeys[firstKeys.length - 1]}) {
-      return text;
-    }
-    if (p2 < ${secondKeys[0]} || p2 > ${secondKeys[secondKeys.length - 1]}) {
-      return text;
-    }
-    if (p3 < ${thirdKeys[0]} || p3 > ${thirdKeys[thirdKeys.length - 1]}) {
-      return text;
-    }
-`;
-};
+  result.push(`
+uint16_t getPinyinCodeIndex(uint16_t c) {
+  uint16_t offset = c - PINYIN_MIN_VALUE;
+  if (offset >= 0 && offset <= ${MAX_VALUE - MIN_VALUE}) {
+    return PINYIN_CODE[offset];
+  }
+  return 0;
+}`);
 
+  result.push(`
+uint16_t toUnicode(const std::string &hanzi) {
+  uint16_t code = (hanzi[0] & 0x1F) << 12;
+  code |= (hanzi[1] & 0x3F) << 6;
+  code |= (hanzi[2] & 0x3F);
+  return code;
+};`);
+
+  result.push(`
 /**
- * @see https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
+ * @see
+ * https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
  */
-const toFullCharsBlock = `/**
-* @see https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
-*/
 std::string toFullChars(const std::string &text) {
   std::stringstream ss;
   for (size_t i = 0; i < text.length();) {
@@ -58,81 +112,24 @@ std::string toFullChars(const std::string &text) {
 
     const std::string cur = text.substr(i, cplen);
     if (cplen == 3) {
-      ss << toPinyin(cur);
+      uint16_t code = toUnicode(cur);
+      if (code == PINYIN_CODE_12295) {
+        ss << PINYIN_12295;
+      } else if (code >= PINYIN_MIN_VALUE && code <= PINYIN_MAX_VALUE) {
+        const std::string pinyin = PINYIN_TABLE[getPinyinCodeIndex(code)];
+        if (!pinyin.empty()) {
+          ss << pinyin;
+        } else {
+          ss << cur;
+        }
+      }
     } else {
       ss << cur;
     }
     i += cplen;
   }
   return ss.str();
-}
-`;
-
-// generate cpp code from dict for parsing chinese to pinyin
-
-const genCpp = (obj) => {
-  const HEADER = '#include "pinyin.h"';
-  const TO_PINYIN = 'toPinyin';
-
-  const result = [];
-  const lenMap = {};
-  const set = {
-    first: {},
-    second: {},
-    third: {},
-  };
-  let len = 0;
-  let idx = 0;
-
-  result.push(`${HEADER}\n`);
-  result.push(toFullCharsBlock);
-
-  // generate dict
-  const dictStat = [];
-  for (let key in obj) {
-    lenMap[key] = {
-      from: idx,
-    };
-    const valArr = [];
-    for (let c of obj[key]) {
-      const hexArr = toHexArr(c);
-      set.first[hexArr[0]] = 1;
-      set.second[hexArr[1]] = 1;
-      set.third[hexArr[2]] = 1;
-      valArr.push(`{ ${hexArr.join(', ')} }`);
-      idx++;
-      len++;
-    }
-    dictStat.push(`  // ${key}\n  ${valArr.join(',\n  ')}`);
-    lenMap[key].to = idx - 1;
-  }
-  result.push(`const static uint8_t dict[${len}][3] = {
-    ${dictStat.join(',\n    ')}
-  };`);
-
-  // generate if return statements
-  const ifRet = [];
-  for (let key in lenMap) {
-    const { from, to } = lenMap[key];
-    ifRet.push(ifRetStat(key, from, to));
-  }
-
-  result.push(`std::string ${TO_PINYIN}(const std::string& text) {
-    const uint8_t p1 = static_cast<uint8_t>(text[0]),
-      p2 = static_cast<uint8_t>(text[1]),
-      p3 = static_cast<uint8_t>(text[2]);
-      ${failRetGuard(set)}
-    for (int i = 0; i < ${len}; i++) {
-      const uint8_t a = dict[i][0], b = dict[i][1], c = dict[i][2];
-      if (p1 == a && p2 == b && p3 == c) {
-        ${ifRet.join('\n')}
-      }
-    }
-    return text;
-  }`);
-
-  console.log(`ifRet length: ${ifRet.length}`);
-  console.log(`Total ${len} text`);
+}`);
 
   const target = join(__dirname, '../../cpp', 'pinyin.cpp');
 
@@ -168,5 +165,6 @@ const genTxt = (obj) => {
   console.log(`Generated ${pinyinTarget}`);
 };
 
-genCpp(dict);
+genHeader(dict);
+genCpp();
 genTxt(dict);
