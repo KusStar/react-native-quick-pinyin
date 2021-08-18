@@ -13,9 +13,7 @@ const genHeader = (obj) => {
   result.push(`#ifndef QUICK_PINYIN_H
 #define QUICK_PINYIN_H
 
-#include <sstream>
 #include <string>
-#include <iostream>
 
 #define PINYIN_MIN_VALUE ${MIN_VALUE}
 #define PINYIN_MAX_VALUE ${MAX_VALUE}
@@ -104,7 +102,7 @@ uint16_t toUnicode(const std::string &hanzi) {
  * https://stackoverflow.com/questions/40054732/c-iterate-utf-8-string-with-mixed-length-of-characters
  */
 std::string toFullChars(const std::string &text) {
-  std::stringstream ss;
+  std::string ret;
   for (size_t i = 0; i < text.length();) {
     int cplen = 1;
     if ((text[i] & 0xf8) == 0xf0) {
@@ -120,21 +118,21 @@ std::string toFullChars(const std::string &text) {
     if (cplen == 3) {
       uint16_t code = toUnicode(cur);
       if (code == PINYIN_CODE_12295) {
-        ss << PINYIN_12295;
+        ret += PINYIN_12295;
       } else if (code >= PINYIN_MIN_VALUE && code <= PINYIN_MAX_VALUE) {
         const std::string pinyin = PINYIN_TABLE[getPinyinCodeIndex(code)];
         if (!pinyin.empty()) {
-          ss << pinyin;
+          ret += pinyin;
         } else {
-          ss << cur;
+          ret += cur;
         }
       }
     } else {
-      ss << cur;
+      ret += cur;
     }
     i += cplen;
   }
-  return ss.str();
+  return ret;
 }`);
 
   const target = join(__dirname, '../../cpp', 'pinyin.cpp');
