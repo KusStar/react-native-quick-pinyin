@@ -1,16 +1,15 @@
-interface QuickPinyin {
+export interface QuickPinyin {
   getFullChars: (text: string) => string;
 }
 
-declare const quickpinyin: QuickPinyin;
+declare global {
+  var quickpinyin: QuickPinyin;
+}
 
-const quickpinyinMock: QuickPinyin = {
+const Pinyin = {
   getFullChars: (text: string) => {
-    console.warn(
-      '[quickpinyin.getFullChars] is not available in your environment'
-    );
-    return text;
+    return quickpinyin.getFullChars(text);
   },
 };
 
-export default quickpinyin ? quickpinyin : quickpinyinMock;
+export default Pinyin;
